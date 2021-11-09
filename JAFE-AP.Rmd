@@ -1,0 +1,904 @@
+---
+output: pdf_document
+geometry: margin=1.0in
+font-size: 11pt
+header-includes:
+  - \usepackage{helvet}
+  - \usepackage{setspace}
+  - \doublespacing
+  - \usepackage[left]{lineno}
+  - \linenumbers
+  - \usepackage{draftwatermark}
+bibliography: references.bib
+csl: econ.csl
+---
+# Global Spatial Autocorrelation of Corn-Belt Farmland Values and Rental Rates
+
+\vspace{30mm}
+
+**Running title:** Spatial Farmland Values 
+
+\vspace{30mm}
+
+
+Allan F. Pinto & Terry W. Griffin
+
+\vspace{20mm}
+Allan Fabricio Pinto Padilla\
+email : apinto@ksu.edu\
+Graduate Research Assistant\
+Agricultural Economics\
+Kansas State University
+
+
+
+
+
+\newpage
+
+# Note
+
+This manuscript was already submitted for publication to the Journal of Applied Farm Economics (JAFE). This manuscript is for discussion only.
+
+\newpage
+
+# Abstract
+Giving empirical application to spatial econometrics models is the main fall in the economic theory approach. Controlling for spatial correlation and dependence is becoming an important part in farmland valuation literature. Farmland is the most basic resources for agricultural production. Price of potential crops, location, productivity level, and some external investment factors have an influence on farmland values and rental rates. Values of farmland and rental rates are expected to be spatially clustered since agricultural production systems are similar, soil productivity indexes change slowly across the landscape. We test spatial correlation in US county-level non-irrigated farmland rental rates from 2009 to 2014 and state-level farmland values from 1950 to 2021 using spatial econometric diagnostic tools. Spatial correlation was detected in farmland values, percent changes in farmland values, and non-irrigated cash rental rates. Results indicated spatial spillovers in the farmland markets had differing interpretations pending geographic scale of datasets. 
+
+Keywords: spatial spillovers, moran, shocks, market, global spillover, connectedness
+
+\newpage
+
+# Acknowledgments 
+
+The authors appreciate USDA NASS for providing access to farmland values and rental rates data and in addition providing access via API; and especially the respondents and enumerators to USDA NASS surveys that inform these analyses. The authors are thankful for open-source software such as R from the R Core Team and those contributing packages to R. The R script used to access data via API to USDA NASS, manage data, make maps, and perform statistical analyses and data visualizations are available on our GitHub site. 
+
+\newpage
+
+# Introduction
+
+Monitoring farmland values and rental rates are a persistent focus of farmers, investors, farm managers, rural appraisers, extension professionals, and other agricultural economists. The value or rental rate of a specific tract of farmland is expected to be a function of agronomic productivity, crop prices, endowed wealth of nearby farmers, topography, irrigation accessibility, demand for non-agricultural uses, and other exogenous factors. Most factors suggest that the location of the tract is intrinsic to its value analogous to the mantra of the real estate industry.
+
+Recent events and current economic status have led to increased attention in the farmland market. Reduction in land for agricultural purposes is a sign of population growth and cities spreading to rural areas plus competition for solar farms, windmills, and other easements. Additionally, from urban development, global food, and fuel demand have become important drivers of farmland values in the U.S. All these features have attracted the attention of farmers, investors, farm managers, rural appraisers, real estate, and agricultural economists. According to @ladd1976prices, the price of an input is influenced by the physical characteristics of the input itself. Some of the characteristics that may influence the price of the land are proximity to existing farm tracts, proximity to urban areas (sprawl), productivity, prices of crops, topography, access to water, and other external factors.
+
+Farmland is considered a non-homogeneous commodity, and locations have an influence on quality. So, a specific site has quality attributes that affect value. Also, the proximity to existing features (other fields or urban) affects value. Land, labor, and capital goods are the three primary factors of production, in this context, it is also the reason for numerous changes in agricultural practices, processes, and techniques. Using the criteria of the National Commodity Crop Productivity Index (NCCPI), it is possible to measure the ability of soils, landscapes, and climates to foster crop productivity. The higher this ability the more expensive and scarce the resource becomes. Taking real estate into consideration, the location of the property is important to determine the value of the property itself. When comparing the property under evaluation to comparison properties with similar characteristics, the proximity from the property under evaluation to the comparable one is a key factor of whether is used it in the analysis [@fernandez2011impact]. One method used in previous studies to identify comparable properties includes spatial methods.
+
+Numerous studies that have explored the values of farmland and rental rates [@wang2018spatial ; @griffin2015spatially ; @ibendahl2013connection ; @schurle2013land ; @kuethe2013farmland ; @paulson2013impact ; @schilling2013residual ; @nickerson2012trends ; @woodard2010spatial ; @cotteleer2008spatial ; @hite2006open ; @huang2006factors ; @lambert2004analysis ; @boisvert1997spatial] have used hedonic pricing model in a spatial context. @wang2018spatial used Pennsylvania county-level data from the U.S. Census of agriculture between 1982 and 2012; the final panel data consisted of 64 counties (three counties were omitted due to missing data) with seven time periods. Based on the theory of spatial competition,  @wang2018spatial derived the spatial structure of farmland values endogenously. Spatial interdependence was found on farmland values across counties. 
+
+Farmland values are autocorrelated over time. Using data for the lower 48 states from USDA-NASS, @griffin2015spatially tested spatial correlation among states. They evaluated state-level farmland values for the lower 48 states and confirmed that the random variable has statistically significant global spatial autocorrelation regardless of time period. Spatial correlation was detected in farmland values and percent changes in farmland values across all years; however, they failed to evaluate farmland data at the county level.
+
+Farmland stock is an important investment in agricultural production, it is imperative to further explore this area so that landowners understand the relationship between pricing, location, and certain characteristics as this can influence farmland value. Given the prevalence of time series analysis to farmland values which are assumed to be impacted by spatial effects, we evaluated an exploratory spatial analysis of farmland values to determine if in fact advanced spatial analyses should be the norm. 
+
+This study builds upon @griffin2015spatially by expanding the data to include the most recent five years then applying these techniques to county-level data from 2009 to 2014. The principal objective of this research was two-fold; first updating years to the data used in @griffin2015spatially, determine the magnitude of spatial autocorrelation in farmland values and changes in farmland values at the state level. Second using data of counties that form the corn belt, evaluate if similar results with respect to the autocorrelation in farmland values can be ascertained at smaller spatial scale. Data from USDA-NASS spanning 1950 to 2021 and 2009 to 2014 was used in this study for state-level and county-level analysis, respectively. We estimate the spatial autocorrelation on percentage change farmland values, to do that the queen contiguity method was adopted as the criterion. Results from this study shed light on the importance that location plays in farmland values and direct future research on acceptable analysis techniques. Our contribution to the previous literature is two-fold: first, we provide a first look into the spatial correlation of location effects in farmland values markets at county level for the corn belt area, measuring the impact of neighbors at 1st, 2nd, and 3rd level of contiguity. Second, using the results from the analysis we can inform the farmers, investors, and real estate the potential of investing in properties among farmland areas in the Midwest (corn belt), which may be different than those in the south, other regions of the country or other types of land. 
+
+\newpage
+
+# Data
+
+```{r setup, include=FALSE, echo=FALSE, cache=FALSE, results=FALSE, warning=FALSE, comment=FALSE, warning=FALSE}
+
+library(httr)
+library(jsonlite)
+library(lubridate)
+library(quantmod)
+library(tidyverse)
+library(usdarnass)
+library(sf)
+library(maps)
+library(mapproj)
+library(rpivotTable)
+library(pivottabler)
+library(janitor)
+library(spdep)
+library(ggpubr)
+library(extrafont)
+library("ggsci")
+library("gridExtra")
+library(tigris)
+library(scales)
+library(expm)
+library(rgdal)
+options(tigris_use_cache = TRUE)
+options(scipen=999)
+loadfonts(quiet=TRUE)
+
+# Acquire data from USDA NASS via API 
+nass_set_key(key = , overwrite = FALSE) #
+dat0000<-nass_data(
+  source_desc="SURVEY",
+  short_desc = "RENT, CASH, CROPLAND, NON-IRRIGATED - EXPENSE, MEASURED IN $ / ACRE",
+  agg_level_desc="COUNTY",
+  domain_desc="TOTAL"
+)
+
+keepers <- c("IOWA", "ILLINOIS", "INDIANA", "KANSAS", "MINNESOTA", "MISSOURI", "NEBRASKA", "SOUTH DAKOTA", "WISCONSIN")
+
+dat <- dat0000 %>%
+  filter(county_code != "998") %>%
+  select(c("county_name", "state_name",  "state_alpha", "state_ansi", "county_ansi", "year", "Value" )) %>%
+  filter(state_name %in% keepers) %>% 
+  type_convert() %>%
+  rename(landvalac = Value) %>%
+  mutate(FIPS = paste(state_ansi, county_ansi, sep="")) %>%
+  as_tibble()
+
+# this shows us how many times each county shows up in the data
+# this keeps counties that have data for all years (here 6) 
+FIPS2use <- dat %>%
+  filter(year >=2009) %>%
+  filter(year <=2014) %>%
+  tabyl(FIPS) %>%
+  filter(n==max(n))
+
+dat4join <- dat %>% 
+  filter(FIPS %in% FIPS2use$FIPS) %>%
+  filter(year >= 2009) %>%
+  filter(year <= 2014) %>%
+  select(year, landvalac, FIPS) %>%
+  pivot_wider(names_from = "year",
+              values_from = "landvalac") 
+
+colnames(dat4join) <- c("GEOID", "nonIrr2014", "nonIrr2013", "nonIrr2012", "nonIrr2011", "nonIrr2010", "nonIrr2009")
+
+UScounties <- counties(cb=T, resolution = '20m') %>%
+filter(STATEFP < "60") %>% # keep only states omits territories out
+  filter(!STATEFP %in% c("02", "15")) # AK HI
+
+
+USstates <- states(cb = T, resolution = '20m') %>%   #st_read('shp/Lower48test.shp', stringsAsFactors = FALSE)
+  filter(STATEFP < "57") %>% # keep only states & omits territories
+  filter(!STATEFP %in% c("02", "11", "15")) #+ # omits AK DC HI
+
+USstates4map <- USstates %>%
+  mutate(order = 1) %>%
+  mutate(order = ifelse(STUSPS == "KS", "Kansas", order)) %>%
+  mutate(order = ifelse(STUSPS == "OK", "first", order))%>%
+  mutate(order = ifelse(STUSPS == "MO", "first", order))%>%
+  mutate(order = ifelse(STUSPS == "NE", "first", order))%>%
+  mutate(order = ifelse(STUSPS == "CO", "first", order))%>%
+  mutate(order = ifelse(STUSPS == "AR", "second", order))%>%
+  mutate(order = ifelse(STUSPS == "TN", "second", order))%>%
+  mutate(order = ifelse(STUSPS == "KY", "second", order))%>%
+  mutate(order = ifelse(STUSPS == "IL", "second", order))%>%
+  mutate(order = ifelse(STUSPS == "IA", "second", order))%>%
+  mutate(order = ifelse(STUSPS == "SD", "second", order))%>%
+  mutate(order = ifelse(STUSPS == "WY", "second", order))%>%
+  mutate(order = ifelse(STUSPS == "UT", "second", order))%>%
+  mutate(order = ifelse(STUSPS == "AZ", "second", order))%>%
+  mutate(order = ifelse(STUSPS == "NM", "second", order))%>%
+  mutate(order = ifelse(STUSPS == "TX", "second", order))%>%
+  mutate(order = ifelse(STUSPS == "LA", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "MS", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "AL", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "GA", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "NC", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "VA", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "MD", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "WV", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "OH", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "IN", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "WI", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "MN", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "ND", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "MT", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "ID", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "NV", "third", order))%>%
+  mutate(order = ifelse(STUSPS == "CA", "third", order))%>%
+    mutate(order = ifelse(order == "1", "NA", order))
+
+ggplot() + 
+  geom_sf(data = USstates4map, aes(fill = order), lwd = .2) 
+
+UScounties4map<-UScounties %>%
+  mutate(order = 1) %>%
+  mutate(order = ifelse(NAME == "Riley", "Riley", order))%>%
+  mutate(order = ifelse(GEOID == "20027", "first", order))%>%
+  mutate(order = ifelse(GEOID == "20061", "first", order))%>%
+  mutate(order = ifelse(GEOID == "20197", "first", order))%>%
+  mutate(order = ifelse(GEOID == "20149", "first", order))%>%
+  mutate(order = ifelse(GEOID == "20117", "first", order))%>%
+  mutate(order = ifelse(GEOID == "20201", "first", order))%>%   
+  mutate(order = ifelse(GEOID == "20157", "second", order))%>%
+  mutate(order = ifelse(GEOID == "20029", "second", order))%>%
+  mutate(order = ifelse(GEOID == "20143", "second", order))%>%
+  mutate(order = ifelse(GEOID == "20041", "second", order))%>%
+  mutate(order = ifelse(GEOID == "20127", "second", order))%>%
+  mutate(order = ifelse(GEOID == "20111", "second", order))%>%
+  mutate(order = ifelse(GEOID == "20139", "second", order))%>%
+  mutate(order = ifelse(GEOID == "20177", "second", order))%>%
+  mutate(order = ifelse(GEOID == "20085", "second", order))%>%
+  mutate(order = ifelse(GEOID == "20131", "second", order))%>%
+  mutate(order = ifelse(GEOID == "31169", "second", order))%>%
+  mutate(order = ifelse(GEOID == "31067", "second", order))%>%
+  mutate(order = ifelse(GEOID == "31095", "second", order))%>%
+  mutate(order = ifelse(GEOID == "31133", "second", order))%>%
+  mutate(order = ifelse(GEOID == "31147", "third", order))%>%
+  mutate(order = ifelse(GEOID == "31127", "third", order))%>%
+  mutate(order = ifelse(GEOID == "31147", "third", order))%>%
+  mutate(order = ifelse(GEOID == "31097", "third", order))%>%
+  mutate(order = ifelse(GEOID == "31131", "third", order))%>%
+  mutate(order = ifelse(GEOID == "31109", "third", order))%>%
+  mutate(order = ifelse(GEOID == "31147", "third", order))%>%
+  mutate(order = ifelse(GEOID == "31151", "third", order))%>%
+  mutate(order = ifelse(GEOID == "31059", "third", order))%>%
+  mutate(order = ifelse(GEOID == "31035", "third", order))%>%
+  mutate(order = ifelse(GEOID == "31129", "third", order))%>%
+  mutate(order = ifelse(GEOID == "20089", "third", order))%>%
+  mutate(order = ifelse(GEOID == "20123", "third", order))%>%
+  mutate(order = ifelse(GEOID == "20105", "third", order))%>%
+  mutate(order = ifelse(GEOID == "20169", "third", order))%>%
+  mutate(order = ifelse(GEOID == "20113", "third", order))%>%
+  mutate(order = ifelse(GEOID == "20115", "third", order))%>%
+  mutate(order = ifelse(GEOID == "20017", "third", order))%>%
+  mutate(order = ifelse(GEOID == "20073", "third", order))%>%
+  mutate(order = ifelse(GEOID == "20031", "third", order))%>%
+  mutate(order = ifelse(GEOID == "20059", "third", order))%>%
+  mutate(order = ifelse(GEOID == "20045", "third", order))%>%
+  mutate(order = ifelse(GEOID == "20087", "third", order))%>%
+  mutate(order = ifelse(GEOID == "20005", "third", order))%>%
+  mutate(order = ifelse(GEOID == "20013", "third", order))%>%
+    mutate(order = ifelse(order == "1", "NA", order))
+
+ggplot() + 
+  geom_sf(data = UScounties4map, aes(fill = order), lwd = .2) 
+
+dat4map <- inner_join(UScounties, dat4join, by = "GEOID")
+maps2create <- c("nonIrr2009", "nonIrr2010", "nonIrr2011", "nonIrr2012", "nonIrr2013", "nonIrr2014")
+
+ ggplot() + 
+   geom_sf(data = UScounties, fill = NA, lwd = .2) +
+   geom_sf(data = dat4map, aes(fill = nonIrr2013)) +
+   geom_sf(data = USstates, fill = NA, lwd = 1) +
+   scale_fill_gradient2(bquote('Rental rate\n($' ~ac^-1*')')) +
+   coord_sf(xlim = c(-104.9, -84.1), ylim = c(35.6, 49.5), expand = FALSE) +
+   theme_bw()
+
+##### this is to create the maps for each year
+landjafe <- dat4map %>%
+  mutate(FIPS = GEOID)
+
+####counties in missouri that are island
+##dallas
+landjafe <- subset(landjafe, FIPS!="29059")
+##laclede
+landjafe <- subset(landjafe, FIPS!="29105")
+###dunklin
+landjafe <- subset(landjafe, FIPS!="29069")
+###new madrid
+landjafe <- subset(landjafe, FIPS!="29143")
+###mississippi
+landjafe <- subset(landjafe, FIPS!="29133")
+##pemiscot
+landjafe <- subset(landjafe, FIPS!="29155")
+
+#####counties in kansas that are island
+##morton
+landjafe <- subset(landjafe, FIPS!="20129")
+###stanton
+landjafe <- subset(landjafe, FIPS!="20187")
+######counties in nebraska that are island
+####cheyenne
+landjafe <- subset(landjafe, FIPS!="31033")
+
+a <- ggplot() + 
+  geom_sf(data = landjafe, aes(fill = nonIrr2014)) +
+  geom_sf(data = UScounties, fill = NA, lwd = .2) +
+  geom_sf(data = USstates, fill = NA, lwd = 0.6) +
+  scale_fill_gradient2(bquote('Rental rate ($' ~ac^-1*')')) +
+  #scale_x_discrete(limits=c("300", "200", "100")) + 
+  coord_sf(xlim = c(-104.9, -84.1), ylim = c(35.6, 49.5), expand = FALSE) +
+  theme_bw()
+
+b <- ggplot() + 
+  geom_sf(data = landjafe, aes(fill = nonIrr2013)) +
+  geom_sf(data = UScounties, fill = NA, lwd = .2) +
+  geom_sf(data = USstates, fill = NA, lwd = 0.6) +
+  scale_fill_gradient2(bquote('Rental rate ($' ~ac^-1*')')) +
+  scale_x_discrete(limits=c("300", "200", "100")) + 
+  coord_sf(xlim = c(-104.9, -84.1), ylim = c(35.6, 49.5), expand = FALSE) +
+  theme_bw()
+
+c <- ggplot() + 
+  geom_sf(data = landjafe, aes(fill = nonIrr2012)) +
+  geom_sf(data = UScounties, fill = NA, lwd = .2) +
+  geom_sf(data = USstates, fill = NA, lwd = 0.6) +
+  scale_fill_gradient2(bquote('Rental rate ($' ~ac^-1*')')) +
+  scale_x_discrete(limits=c("300", "200", "100")) + 
+  coord_sf(xlim = c(-104.9, -84.1), ylim = c(35.6, 49.5), expand = FALSE) +
+  theme_bw()
+
+d <- ggplot() + 
+  geom_sf(data = landjafe, aes(fill = nonIrr2011)) +
+  geom_sf(data = UScounties, fill = NA, lwd = .2) +
+  geom_sf(data = USstates, fill = NA, lwd = 0.6) +
+  scale_fill_gradient2(bquote('Rental rate ($' ~ac^-1*')'), breaks=c(100,200,300), limits=c(0,300)) +
+  coord_sf(xlim = c(-104.9, -84.1), ylim = c(35.6, 49.5), expand = FALSE) +
+  theme_bw()
+
+e <- ggplot() + 
+  geom_sf(data = landjafe, aes(fill = nonIrr2010)) +
+  geom_sf(data = UScounties, fill = NA, lwd = .2) +
+  geom_sf(data = USstates, fill = NA, lwd = 0.6) +
+  scale_fill_gradient2(bquote('Rental rate ($' ~ac^-1*')'), breaks=c(100,200,300), limits=c(0,300)) +
+  coord_sf(xlim = c(-104.9, -84.1), ylim = c(35.6, 49.5), expand = FALSE) +
+  theme_bw()
+
+f <- ggplot() + 
+  geom_sf(data = landjafe, aes(fill = nonIrr2009)) +
+  geom_sf(data = UScounties, fill = NA, lwd = .2) +
+  geom_sf(data = USstates, fill = NA, lwd = 0.6) +
+  #  scale_fill_gradient2(bquote('Rental rate\n($' ~ac^-1*')')) +
+  scale_fill_gradient2(bquote('Rental rate ($' ~ac^-1*')'), breaks=c(100,200,300), limits=c(0,300)) +
+  coord_sf(xlim = c(-104.9, -84.1), ylim = c(35.6, 49.5), expand = FALSE) +
+  theme_bw()
+
+ggarrange(a, b, c, d, e, f, 
+          labels = c("a. 2014", "b. 2013", "c. 2012", "d. 2011", "e. 2010", "f. 2009"),
+          widths = rep(3,6), 
+          #labels = "auto",
+          label.y = 0,
+          hjust = -0.750,
+          vjust = -0.1,
+          #align = "v",
+          font.label = list(size = 10, color = "black", face = "plain", family = NULL),
+          legend = "bottom",
+          common.legend = TRUE,
+          ncol = 2, nrow = 3)
+ #ggsave("nonIrr.png", height = 10, width = 8, units = "in", dpi = "retina")
+
+##### creating the % change
+year.range <- 2009:2014
+
+landjafe <- landjafe %>%
+  mutate(realvalac2010 = 100*(nonIrr2010-nonIrr2009) / nonIrr2009)%>%
+  mutate(realvalac2011 = 100*(nonIrr2011-nonIrr2010) / nonIrr2010) %>%
+  mutate(realvalac2012 = 100*(nonIrr2012-nonIrr2011) / nonIrr2011) %>%
+  mutate(realvalac2013 = 100*(nonIrr2013-nonIrr2012) / nonIrr2012) %>%
+  mutate(realvalac2014 = 100*(nonIrr2014-nonIrr2013) / nonIrr2013)  
+
+min(landjafe$realvalac2014)
+max(landjafe$realvalac2014)
+min(landjafe$realvalac2010)
+max(landjafe$realvalac2010)
+min(landjafe$realvalac2011)
+max(landjafe$realvalac2011)
+min(landjafe$realvalac2012)
+max(landjafe$realvalac2012)
+min(landjafe$realvalac2013)
+max(landjafe$realvalac2013)
+
+ca <- ggplot() + 
+  geom_sf(data = landjafe, aes(fill = realvalac2014)) +
+  geom_sf(data = UScounties, fill = NA, lwd = .2) +
+  geom_sf(data = USstates, fill = NA, lwd = 0.6) +
+  scale_fill_gradient2('% change rental rate', breaks= seq(-40, 60, 25), limits=c(-40, 60)) +
+  #scale_fill_gradient2('% change rental rate') +
+  #scale_x_discrete(limits=c("300", "200", "100")) + 
+  coord_sf(xlim = c(-104.9, -84.1), ylim = c(35.6, 49.5), expand = FALSE) +
+  theme_bw()
+
+cb <- ggplot() + 
+  geom_sf(data = landjafe, aes(fill = realvalac2013)) +
+  geom_sf(data = UScounties, fill = NA, lwd = .2) +
+  geom_sf(data = USstates, fill = NA, lwd = 0.6) +
+  scale_fill_gradient2('% change rental rate', breaks= seq(-40, 60, 25), limits=c(-40, 60)) +
+  #scale_fill_gradient2('% change rental rate') +
+  scale_x_discrete(limits=c("300", "200", "100")) + 
+  coord_sf(xlim = c(-104.9, -84.1), ylim = c(35.6, 49.5), expand = FALSE) +
+  theme_bw()
+
+cc <- ggplot() + 
+  geom_sf(data = landjafe, aes(fill = realvalac2012)) +
+  geom_sf(data = UScounties, fill = NA, lwd = .2) +
+  geom_sf(data = USstates, fill = NA, lwd = 0.6) +
+  scale_fill_gradient2('% change rental rate', breaks= seq(-40, 60, 25), limits=c(-40, 60)) +
+  #scale_fill_gradient2('% change rental rate') +
+  scale_x_discrete(limits=c("300", "200", "100")) + 
+  coord_sf(xlim = c(-104.9, -84.1), ylim = c(35.6, 49.5), expand = FALSE) +
+  theme_bw()
+
+cd <- ggplot() + 
+  geom_sf(data = landjafe, aes(fill = realvalac2011)) +
+  geom_sf(data = UScounties, fill = NA, lwd = .2) +
+  geom_sf(data = USstates, fill = NA, lwd = 0.6) +
+  scale_fill_gradient2('% change rental rate', breaks= seq(-40, 60, 25), limits=c(-40, 60)) +
+  #  scale_fill_gradient2('% change rental rate', breaks=c(.2, .4, .8), limits=c(0, 1)) +
+  coord_sf(xlim = c(-104.9, -84.1), ylim = c(35.6, 49.5), expand = FALSE) +
+  theme_bw()
+
+ce <- ggplot() + 
+  geom_sf(data = landjafe, aes(fill = realvalac2010)) +
+  geom_sf(data = UScounties, fill = NA, lwd = .2) +
+  geom_sf(data = USstates, fill = NA, lwd = 0.6) +
+  scale_fill_gradient2('% change rental rate', breaks= seq(-40, 60, 25), limits=c(-40, 60)) +
+  coord_sf(xlim = c(-104.9, -84.1), ylim = c(35.6, 49.5), expand = FALSE) +
+  theme_bw()
+
+ ggarrange(ca, cb, cc, cd, ce, 
+           labels = c("a. 2014", "b. 2013", "c. 2012", "d. 2011", "e. 2010"),
+          # labels = "auto",
+           label.y = 0,
+           hjust = -0.750,
+           vjust = -0.1,
+          # align = "v",
+           font.label = list(size = 10, color = "black", face = "plain", family = NULL),
+          legend = "bottom",
+           common.legend = TRUE,
+           ncol = 2, nrow = 3)
+ #ggsave("perecentChangeNonIrr.png", height = 10, width = 8, units = "in", dpi = "retina")
+
+
+#########
+
+#####create the queen order with landjafe to moran plots
+
+landjafe.q1.nb <- landjafe %>% 
+  poly2nb(row.names = landjafe$GEOID) # neighbors list
+
+landjafe.q1.listW <-  nb2listw(landjafe.q1.nb, style = "W", zero.policy = F) # nb to weights 
+
+landjafe.q1.listW2 <- landjafe.q1.nb %>%
+  nblag(2) %>%
+  nblag_cumul() %>%
+  nb2listw(style= "W", zero.policy = F)
+
+landjafe.q1.listW3 <- landjafe.q1.nb %>%
+  nblag(3) %>%
+  nblag_cumul() %>%
+  nb2listw(style= "W", zero.policy = F)
+
+dat4forLoop<-c("nonIrr2014", "nonIrr2013", "nonIrr2012", "nonIrr2011", "nonIrr2010",  "nonIrr2009")
+
+myBox<-matrix(NA, nrow=6, ncol=6)
+
+moran.2009<-moran.test(landjafe$nonIrr2009, landjafe.q1.listW, zero.policy = F, alternative = "two.sided")
+moran.2010<-moran.test(landjafe$nonIrr2010, landjafe.q1.listW, zero.policy = F, alternative = "two.sided")
+moran.2011<-moran.test(landjafe$nonIrr2011, landjafe.q1.listW, zero.policy = F, alternative = "two.sided")
+moran.2012<-moran.test(landjafe$nonIrr2012, landjafe.q1.listW, zero.policy = F, alternative = "two.sided")
+moran.2013<-moran.test(landjafe$nonIrr2013, landjafe.q1.listW, zero.policy = F, alternative = "two.sided")
+moran.2014<-moran.test(landjafe$nonIrr2014, landjafe.q1.listW, zero.policy = F, alternative = "two.sided")
+
+myBox[1,1]<-moran.2009$estimate[1]
+myBox[2,1]<-moran.2010$estimate[1]
+myBox[3,1]<-moran.2011$estimate[1]
+myBox[4,1]<-moran.2012$estimate[1]
+myBox[5,1]<-moran.2013$estimate[1]
+myBox[6,1]<-moran.2014$estimate[1]
+
+moran2.2009<-moran.test(landjafe$nonIrr2009, landjafe.q1.listW2, zero.policy = F, alternative = "two.sided")
+moran2.2010<-moran.test(landjafe$nonIrr2010, landjafe.q1.listW2, zero.policy = F, alternative = "two.sided")
+moran2.2011<-moran.test(landjafe$nonIrr2011, landjafe.q1.listW2, zero.policy = F, alternative = "two.sided")
+moran2.2012<-moran.test(landjafe$nonIrr2012, landjafe.q1.listW2, zero.policy = F, alternative = "two.sided")
+moran2.2013<-moran.test(landjafe$nonIrr2013, landjafe.q1.listW2, zero.policy = F, alternative = "two.sided")
+moran2.2014<-moran.test(landjafe$nonIrr2014, landjafe.q1.listW2, zero.policy = F, alternative = "two.sided")
+
+myBox[1,2]<-moran2.2009$estimate[1]
+myBox[2,2]<-moran2.2010$estimate[1]
+myBox[3,2]<-moran2.2011$estimate[1]
+myBox[4,2]<-moran2.2012$estimate[1]
+myBox[5,2]<-moran2.2013$estimate[1]
+myBox[6,2]<-moran2.2014$estimate[1]
+
+moran3.2009<-moran.test(landjafe$nonIrr2009, landjafe.q1.listW3, zero.policy = F, alternative = "two.sided")
+moran3.2010<-moran.test(landjafe$nonIrr2010, landjafe.q1.listW3, zero.policy = F, alternative = "two.sided")
+moran3.2011<-moran.test(landjafe$nonIrr2011, landjafe.q1.listW3, zero.policy = F, alternative = "two.sided")
+moran3.2012<-moran.test(landjafe$nonIrr2012, landjafe.q1.listW3, zero.policy = F, alternative = "two.sided")
+moran3.2013<-moran.test(landjafe$nonIrr2013, landjafe.q1.listW3, zero.policy = F, alternative = "two.sided")# change 2 to 3 TWG
+moran3.2014<-moran.test(landjafe$nonIrr2014, landjafe.q1.listW3, zero.policy = F, alternative = "two.sided")# change 2 to 3 TWG
+
+myBox[1,3]<-moran3.2009$estimate[1]
+myBox[2,3]<-moran3.2010$estimate[1]
+myBox[3,3]<-moran3.2011$estimate[1]
+myBox[4,3]<-moran3.2012$estimate[1]
+myBox[5,3]<-moran3.2013$estimate[1]
+myBox[6,3]<-moran2.2014$estimate[1]
+
+##### Moran $ change
+moran.2010c<-moran.test(landjafe$realvalac2010, landjafe.q1.listW, zero.policy = F, alternative = "two.sided")
+moran.2011c<-moran.test(landjafe$realvalac2011, landjafe.q1.listW, zero.policy = F, alternative = "two.sided")
+moran.2012c<-moran.test(landjafe$realvalac2012, landjafe.q1.listW, zero.policy = F, alternative = "two.sided")
+moran.2013c<-moran.test(landjafe$realvalac2013, landjafe.q1.listW, zero.policy = F, alternative = "two.sided")
+moran.2014c<-moran.test(landjafe$realvalac2014, landjafe.q1.listW, zero.policy = F, alternative = "two.sided")
+
+myBox[2,4]<-moran.2010c$estimate[1]
+myBox[3,4]<-moran.2011c$estimate[1]
+myBox[4,4]<-moran.2012c$estimate[1]
+myBox[5,4]<-moran.2013c$estimate[1]
+myBox[6,4]<-moran.2014c$estimate[1]
+
+moran2.2010c<-moran.test(landjafe$realvalac2010, landjafe.q1.listW2, zero.policy = F, alternative = "two.sided")
+moran2.2011c<-moran.test(landjafe$realvalac2011, landjafe.q1.listW2, zero.policy = F, alternative = "two.sided")
+moran2.2012c<-moran.test(landjafe$realvalac2012, landjafe.q1.listW2, zero.policy = F, alternative = "two.sided")
+moran2.2013c<-moran.test(landjafe$realvalac2013, landjafe.q1.listW2, zero.policy = F, alternative = "two.sided")
+moran2.2014c<-moran.test(landjafe$realvalac2014, landjafe.q1.listW2, zero.policy = F, alternative = "two.sided")
+
+myBox[2,5]<-moran2.2010c$estimate[1]
+myBox[3,5]<-moran2.2011c$estimate[1]
+myBox[4,5]<-moran2.2012c$estimate[1]
+myBox[5,5]<-moran2.2013c$estimate[1]
+myBox[6,5]<-moran2.2014c$estimate[1]
+
+moran3.2010c<-moran.test(landjafe$realvalac2010, landjafe.q1.listW3, zero.policy = F, alternative = "two.sided")
+moran3.2011c<-moran.test(landjafe$realvalac2011, landjafe.q1.listW3, zero.policy = F, alternative = "two.sided")
+moran3.2012c<-moran.test(landjafe$realvalac2012, landjafe.q1.listW3, zero.policy = F, alternative = "two.sided")
+moran3.2013c<-moran.test(landjafe$realvalac2013, landjafe.q1.listW3, zero.policy = F, alternative = "two.sided")
+moran3.2014c<-moran.test(landjafe$realvalac2014, landjafe.q1.listW3, zero.policy = F, alternative = "two.sided")
+
+myBox[2,6]<-moran3.2010c$estimate[1]
+myBox[3,6]<-moran3.2011c$estimate[1]
+myBox[4,6]<-moran3.2012c$estimate[1]
+myBox[5,6]<-moran3.2013c$estimate[1]
+myBox[6,6]<-moran3.2014c$estimate[1]
+
+myBox2<-as.data.frame(myBox)
+rownames(myBox2)<-c("2009", "2010", "2011", "2012", "2013", "2014")
+colnames(myBox2)<-c("First", "Second", "Third", "FirstC", "SecondC", "ThirdC")
+myBox2$year<-rownames(myBox2)
+
+moranDat <- myBox2 %>%
+pivot_longer(!year, names_to = "contiguity", values_to = "I")
+
+ggplot(data = moranDat, 
+       aes(x=year, y=I, group = contiguity, col = contiguity, linetype = contiguity)) +
+  geom_line(lwd = 0.9) + #
+  geom_hline(yintercept = 0, linetype='dashed') +
+  labs(title = "Moran's I Test Statistics: 2009 - 2014",
+       subtitle = paste('Farmland values and percentage change appreciation rates'),
+       caption = 'Data: USDA National Agriculutural Statistics Service',
+       y="Moran's I test statistic", x = NULL) + ylim(-0.1, 1.0) +
+      theme_bw() +
+  theme(text = element_text(family='serif'),
+        plot.title = element_text(face='bold'),
+        plot.subtitle=element_text(size=8),
+        plot.caption=element_text(size=8),
+        axis.title.x = element_blank(),
+        legend.title = element_blank(),
+        legend.position = "bottom")  +
+  scale_color_aaas(
+    #breaks = c("First",   "FirstC"  , "Second"  , "SecondC",  "Third",   "ThirdC" ),
+    labels=c("farmland values ($/ac), first order", "farmland values (% change), first order",
+             "farmland value ($/ac), second order", "farmland values (% change), second order",
+             "farmland value ($/ac), third order", "farmland values (% change), third order")) + 
+   scale_linetype_manual(
+     values = c("solid", "dotted", "solid", "dotted", "solid", "dotted"),
+#    breaks = NULL, 
+     labels = c("farmland values ($/ac), first order", "farmland values (% change), first order",
+            "farmland value ($/ac), second order", "farmland values (% change), second order",
+            "farmland value ($/ac), third order", "farmland values (% change), third order")) #+ 
+
+
+
+######code for state level
+
+datstate<-nass_data(year=">=1950", 
+               source_desc="SURVEY",
+          short_desc = "AG LAND, INCL BUILDINGS - ASSET VALUE, MEASURED IN $ / ACRE",
+          agg_level_desc="STATE",
+          domain_desc="TOTAL"
+          )
+
+landval<-as_tibble(datstate[c("state_name", "state_alpha", "year", "Value" )])
+
+landval<-landval %>%
+  type_convert() %>%
+  # mutate(year = parse_integer(year)) %>%
+  rename(landvalac = Value)
+landval
+
+# Data from St. Louis Fed
+seriestoget <- c('GDP', 'CPIAUCSL', 'M2SL', 'TB3MS', 'WTISPLC', 'TWEXBMTH')
+getSymbols(seriestoget, src='FRED')
+
+xts.to.ts.yearly <- function(series.in, freq.in) {
+  start.date <- start(series.in)
+  start.vec  <- c(year(start.date), month(start.date))
+  series.ts  <- ts(series.in, start=start.vec, frequency=freq.in)
+  series.ts  <- aggregate(series.ts, nfrequency=1, mean)
+  return(series.ts)
+}
+
+usgdp   <- xts.to.ts.yearly(GDP, 4)
+uscpi   <- xts.to.ts.yearly(CPIAUCSL, 12)
+usm2    <- xts.to.ts.yearly(M2SL, 12)
+ustbill <- xts.to.ts.yearly(TB3MS, 12)
+usoil   <- xts.to.ts.yearly(WTISPLC, 12)
+
+usa <- ts.intersect(yr=time(usgdp), usgdp, uscpi, usm2, ustbill, usoil) %>%
+  as_tibble() %>%
+  mutate(inf = 100*(uscpi - lag(uscpi))/lag(uscpi))
+usa
+
+data.out <- inner_join(landval, usa, by=c('year'='yr')) %>%
+  mutate(realvalac = landvalac * uscpi / 218.0767)
+
+options(scipen=999)
+
+loadfonts(quiet=TRUE)
+year.range2 <- 1960:2020
+# Read in NASS data
+land <- data.out %>%
+  select(state_alpha, year, realvalac, state_name) %>%
+  arrange(state_alpha, year) %>%
+  mutate(realvalac.L1 = lag(realvalac, 1)) %>%
+  mutate(realvalac.PD1 = 100*(realvalac-realvalac.L1) / realvalac.L1) %>%
+  filter(year >= year.range2[1]) %>%
+  mutate(name=tolower(state_name))
+
+# Read in US state shapefile
+# Create spatial weights matrix: queen contiguity order 1-3
+usstates <- USstates %>%
+  mutate(name = tolower(NAME))
+
+statess <- usstates[order(usstates$GEOID),]
+states.tbl         <- fortify(statess, region='GEOID')
+
+states.q1.nb       <- poly2nb(statess, row.names=statess$GEOID)
+states.q1.mat      <- nb2mat(states.q1.nb)
+states.queen.W     <- lapply(1:3, function(i) states.q1.mat %^% i)
+states.queen.listW <- lapply(states.queen.W, function(X) mat2listw(X))
+states.q1.listW    <- nb2listw(states.q1.nb, zero.policy = T)
+
+afp <- matrix(NA, nrow = max(year.range2)-min(year.range2)+1, ncol = 7)
+
+for(j in 1960:2020){
+  statemap <- land %>%
+    filter(year == j) %>%
+    mutate(name = tolower(state_name))
+
+  datastates <- inner_join(statess, statemap, "name")
+  
+  twg1 <- moran.test(datastates$realvalac.L1, listw = states.queen.listW[[1]], zero.policy = F, alternative = "two.sided")
+  twg2 <- moran.test(datastates$realvalac.L1, listw = states.queen.listW[[2]], zero.policy = F, alternative = "two.sided")
+  twg3 <- moran.test(datastates$realvalac.L1, listw = states.queen.listW[[3]], zero.policy = F, alternative = "two.sided")
+  twg1a<- moran.test(datastates$realvalac.PD1,listw = states.queen.listW[[1]],
+                     zero.policy = F, alternative = "two.sided")
+  twg2a<- moran.test(datastates$realvalac.PD1,listw = states.queen.listW[[2]],
+                     zero.policy = F, alternative = "two.sided")
+  twg3a<- moran.test(datastates$realvalac.PD1,listw = states.queen.listW[[3]],
+                     zero.policy = F, alternative = "two.sided")
+  
+   y <- j-min(year.range2) + 1
+ afp[y,1] <- j
+ afp[y,2] <- twg1$estimate[1]
+ afp[y,3] <- twg2$estimate[1]
+ afp[y,4] <- twg3$estimate[1]
+ afp[y,5] <- twg1a$estimate[1]
+ afp[y,6] <- twg2a$estimate[1]
+ afp[y,7] <- twg3a$estimate[1]
+ 
+afpp<-as.data.frame(afp)
+rownames(afpp)<-year.range2
+colnames(afpp)<-c("year" ,"First", "Second", "Third", "FirstC","SecondC", "ThirdC")
+
+moranstate <- afpp %>%
+  pivot_longer(!year, names_to = "contiguity", values_to = "I")%>%
+  mutate(year = as.numeric(year))
+} 
+```
+
+This paper aims to determine to what extent location influences farmland prices at two data levels. Our study was conducted using two datasets. The first is a state-level data of annual US farmlands including buildings agricultural land total price ($/acre) of all production and practices farmland of the lower 48 states from years 1950 through 2021.
+
+These state-level data were instinctively balanced with county-level rental rates ($/acre) of non-irrigated farmland for 607 counties from the Corn Belt (IA, IL, IN, KS, MN, MO, NE, SD, WI). Not all 3,104 counties in the lower 48 states had cash rental data available, i.e., unlike state-level data, the county-level farmland rental rates were not balanced. Therefore, the county-level was subset for years 2009 through 2014 so that it would be a balanced panel of 607 counties from nine of the lower 48 states. Both data sets of were acquired from USDA NASS via application programming interface (API) to QuickStats [@tidyUSDA].
+
+The USDA NASS began collecting county-level data for farmland rental rates in 2008 and continue to the present, although 2015 and 2018 were omitted. However, not all counties had data available for each year. For purposes of the analysis, a balanced panel data was desired. First, a subset of the nine states that form the corn belt area was created (see map in figure 2). Second, data for 2008 were omitted due to limited sample size, therefore a subset of counties with data from 2009-2014 was used. Data reported since 2016 were omitted due to 2015 and 2018 were not reported, causing percent changes calculations from one year to the next to be impossible. Further selection and scrutinization were needed since the objective of the analysis was not only to determine the effect of location on farmland values; but also, to measure the impact of neighboring land prices on the prices of its 1st, 2nd, and 3rd order level neighbors. Finally,  isolates or “island” counties, counties without a direct neighbor or small groups of counties not connected to the larger region, were omitted from the data set, resulting in a total of 607 counties. The number of counties that had a rental value from the original data set and has the final number of counties per state in the data used in the analysis are presented in Table 1. Some states have a larger number of counties than final data because not every year has the same counties with non-irrigated cash rental rates reported by USDA-NASS for selected states.
+
+
+```{r table2, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+
+tabl<-table(dat$year, dat$state_alpha)
+
+knitr::kable( tabl )
+```
+Figure 1 shows the map of counties in the sample under study and their rent prices distribution for farmland from 2009 through 2014. Figure 2 shows the map of counties with their percent change distribution for rental rates from 2010 through 2014. In the center of the map of the Midwest and great plains area, the rental rates are higher than the rest of the areas; this could be a result of the proximity of grain elevators, local grain production, geography, markets, or other agricultural productions in the area.
+
+```{r echo=FALSE, fig.align = 'center', fig.width=6, fig.height=9, fig.cap = "Non-irrigated US farmland rental rates in 607 selected US counties, 2009 to 2014."}
+ ggarrange(a, b, c, d, e, f,
+           labels = c("a. 2014", "b. 2013", "c. 2012", "d. 2011", "e. 2010", "f. 2009"),
+           #labels = "auto",
+           label.y = 0,
+           hjust = -0.750,
+           vjust = -0.1,
+           #align = "v",
+           font.label = list(size = 10, color = "black", face = "plain", family = NULL),
+           legend = "bottom",
+           common.legend = TRUE,
+           ncol = 2, nrow = 3)
+
+```
+
+```{r echo=FALSE, fig.align = 'center',fig.width=6, fig.height=9, fig.cap = "Percentage change in non-irrigated US farmland rental rates in 607 selected US counties, 2010 to 2014."}
+ ggarrange(ca, cb, cc, cd, ce, 
+           labels = c("a. 2014", "b. 2013", "c. 2012", "d. 2011", "e. 2010"),
+          # labels = "auto",
+           label.y = 0,
+           hjust = -0.750,
+           vjust = -0.1,
+          # align = "v",
+           font.label = list(size = 10, color = "black", face = "plain", family = NULL),
+          legend = "bottom",
+           common.legend = TRUE,
+           ncol = 2, nrow = 3)
+
+```
+
+The average number of connections for the 1st, 2nd, and 3rd order queen contiguity (4.46, 7.33, and 8.9 states, respectively) for the state-level data are presented in Table 2. Links are the connections between observations, in this case states. The percentage of non-zero weights is the proportion of the neighborhood definition with connections. In all three cases, the minimum number of links were non-zero ensuring that each observation has at least one neighbor i.e., no isolates or lone “islands”. 
+
+At the county level, the average number of links were 5.2, 15.0, and 29.3 for the respective spatial weights matrices. These are somewhat similar for the 1st order queen but drastically more connected for 2nd and 3rd order contiguity. The maximum number of links were also similar between state and county 1st order contiguity at 8 and 10, respectively. 
+
+```{r table-simple, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+require(pander)
+panderOptions('table.split.table', Inf)
+set.caption(" Descriptive statistics of spatial weight definitions at the state-level.
+") 
+my.data <- "      |  |State| | |County
+Order of Contiguity                       |$1^{st}$|$2^{nd}$|$3^{rd}$|$1^{st}$|$2^{nd}$|$3^{rd}$
+Number of non-zero links       | 216  | 354  |  440 | 3130 | 9082 | 17748
+Percentage of non-zero weights | 9.4  | 15.4 |  19.1| 0.8  |  2.5 | 4.8   
+Average number of links        |  4.5 |  7.4 |  9.2 | 5.2  |  15  | 29.2   
+Minimum number of links        |  1   |  2   |  2   |  1   |  2   | 5 
+Maximum number of links        |  8   |  17  |   17 |  10  |  26  | 46  
+"
+df <- read.delim(textConnection(my.data),header=FALSE,sep="|",strip.white=TRUE,stringsAsFactors=FALSE)
+names(df) <- unname(as.list(df[1,])) # put headers on
+df <- df[-1,] # remove first row
+row.names(df)<-NULL
+pander(df, style = 'rmarkdown')
+```  
+
+#	Empirical model
+
+Exploratory spatial data analyses include tests for global spatial autocorrelation to evaluate relationships between specific observations and describes the degree objects are similar to nearby observations. Using percentage changes in U.S. agricultural farmland values, state-level spatial autocorrelation was estimated. 
+
+Percentage change variable was calculated by differencing consecutive years and dividing by the previous value, whether farmland value or rental rate. Percentage change, % change, were calculated by first subtracting the value in $year_{t-1}$ from $year_t$ then dividing the difference by value of $year_{t-1}$ and multiplying by 100 (Equation 1).
+
+\begin{equation}
+\% change = \frac {value_t - value_{t-1}}{value_{t-1}}*100
+\end{equation}
+
+Reporting spatial autocorrelation among state and county farmland values and rents over time was one objective of this paper. Spatial analyses rely on taking into consideration the relationship between a set of neighbors to be defined. Given the political boundaries of states and counties, neighborhood structure based on contiguity were chosen. As the order of contiguity increases, the greater the spatial effect of the neighboring state assuming that lower orders are included in the neighborhood definition [@griffin2015spatially]. A queen contiguity neighborhood structure was chosen such that neighbors share a side of either zero or non-zero length, i.e., a vertex or border, respectively. Based on the game of chess, states (or counties) that share a border or vertex are considered neighbors [@anselin1988spatial]. Queen contiguity definitions applied in this research were 1st, 2nd and 3rd order for the lower 48 states and the 607 counties. Immediate neighbors are those that share a border or corner, for those states a 1st order queen contiguity was defined. Just as in the game of chess, the queen can move to spaces that touch the first neighbors’ spaces. The neighbors of the neighbors are defined as the 2nd order queen contiguity. Finally, the neighbors of neighbors of neighbors are part of the 3rd order queen contiguity. For the 2nd and 3rd order queen contiguity the immediate neighbors were excluded from their matrices such that lower orders were omitted. For example, Kansas shares border and is immediate neighbor with Colorado, Missouri, Nebraska, and Oklahoma. Kansas 2nd order queen contiguity has a total of 11 states and include Arkansas, Tennessee, Kentucky, Illinois, Iowa, South Dakota, Wyoming, Utah, Arizona, New Mexico, and Texas. The 3rd order queen contiguity of Kansas has a total of 16 states and include Louisiana, Mississippi, Alabama, Georgia, North Carolina, Virginia, West Virginia, Ohio, Indiana, Wisconsin, Minnesota, North Dakota, Montana, Idaho, and Nevada. As mentioned before the 3rd order neighbors are neighbors of 2nd order neighbors (neighbors of neighbors of neighbors). Even though Arizona only shares a corner or vertex with Colorado, they are still considered neighbors. Figure 3 has a visual representation of the example explained above. Given that California is a 3rd order neighbor of Kansas may seem suspect, an analogous map of county level connectedness contrasts that of state-level connectedness. Figure 4 has a visual example of queen contiguity at the county level using Riley County, KS as a reference point. County-level map has a very different spillover effect. As opposed to state level connectedness, 3rd order neighbors of Riley County Kansas spills over only into southern Nebraska; a stark difference relative to Kansas and California being 3rd order neighbors for state level data.
+
+```{r echo=FALSE, fig.align = 'center', out.width = "125%", fig.cap = "Three queen contiguity orders for U.S. states relative to Kansas."}
+ggplot() + 
+  geom_sf(data = USstates4map, aes(fill = order), lwd = .2) + 
+  scale_color_manual(values = c("Kansas" = "black", "first" = "gray40",
+                                "second" = "gray60", "third" = "gray80", "NA" = "white"))+
+  scale_fill_manual(name="Order of contiguity",
+                    breaks=c("Kansas", "first", "second", "third"),
+                    labels=c("Kansas", "First", "Second", "Third"),
+                    values=c("Kansas" = "black", "first" = "gray40", 
+                             "second" = "gray60", "third" = "gray80" , "NA" = "white"))+
+  theme_bw()
+```
+
+```{r echo=FALSE, fig.align = 'center', out.width = "125%", fig.cap = "Three queen contiguity orders for U.S. counties relative to Riley County Kansas."}
+ggplot() + 
+  geom_sf(data = UScounties4map, aes(fill = order), lwd = .2)+
+  scale_color_manual(values = c("Riley" = "black", "first" = "gray40",
+                                "second" = "gray60", "third" = "gray80", "NA" = "white"))+
+  geom_sf(data=USstates, fill=NA, lwd=0.6)+
+  scale_fill_manual(name="Order of contiguity",
+                    breaks=c("Riley", "first", "second", "third"),
+                    labels=c("Riley", "First", "Second", "Third"),
+                    values=c("Riley" = "black", "first" = "gray40", 
+                             "second" = "gray60", "third" = "gray80" , "NA" = "white"))+
+  theme_bw()
+```
+
+Spatial diagnostics were performed on the respective random variable. Specifically, Moran’s I test statistic was estimated for land values and percent change in land values for lower 48 states (agricultural value for all land including buildings) and the 607 counties (non-irrigated cash rent). According to @schabenberger2017statistical the Moran’s indicator can be loosely interpreted as a correlation coefficient. The Moran’s I test statistic is a spatial correlation coefficient not strictly bound between $[-1,1]$ but rather $\frac{1}{\wedge_{n-1}} , \frac{1}{\wedge_{(1)}}$ ; where $\wedge_{(n-1)}$  and $\wedge_{(1)}$ are the minimum and maximum eigenvalues of W, respectively and can be interpreted as follow: 0 values indicate no autocorrelation or spatially random; values less than 0 to negative 1 indicates objects are different or have negative autocorrelation; values greater than 0 to positive 1 indicates that objects are similar to each other or have a positive autocorrelation.
+
+The Moran’s I test statistic for spatial autocorrelation [@anselin1988spatial; @cliff1981spatial] proceed as follow:
+
+\begin{equation}
+I = \frac{n}{\textbf{W}_{ij}} \frac{\sum^n _{i=1} \sum^n _{j=1} w_{ij} (x_i - \overline x) (x_j - \overline x)}{\sum ^n _{i=1} (x_i - \overline x)^2}
+\end{equation}
+  
+where $\textbf{w}_{ij}$ is an $n x n$ spatial weight matrix of the connections between units $i$ and $j$, $x_i$, $x_j$ is an $n x 1$ value of the variables in spatial units $i$ and $j$, $\overline x$ is the arithmetic mean value of the analyzed variable for all spatial units [@schabenberger2017statistical; @anselin1988spatial; @cliff1981spatial]. Large (small) neighboring values are interpreted as a positive Moran’s I, both large and small values are the result of a negative neighboring values, and finally spatially random distribution represents a zero value of the Moran’s I test. In previous studies Moran scatter plot has been useful to identify the spatial autocorrelation. Spatially weighted average (spatial lag) farmland values are the y-axis of the corresponding observation on the horizontal x-axis. Correlation between average farmland value and farmland location (state) are visually shown on the Moran scatter plot. Based on Moran’s I value, a pattern can be observed in the states. Each state has its own indicator. In other words, with this value it can be identified if the state is neighbor to states with high or low farmland values. By doing so, it is easy to find cluster of high (low) farmland values and states (counties) with values significantly different from the neighbors. As mentioned before, the value of one land can be influenced by the value of its neighbors.
+
+@anselin2003spatial describes the difference between local and global spillovers. Global spillover occurs when a change or a shock in the value of X at any location will be transmitted to all other locations, even if two locations are not directly connected according to 1st, 2nd, and 3rd queen order of contiguity ($\textbf{W}$ matrix). Local spillover occurs when a change in the value of X at any locations affects only those locations that are directly connected to each other as exogeneously defined by $\textbf{W}$. @lesage2011pitfalls describe additional differences to global and local spillovers. The first one has a feedback effects, this means that a change originated in region (a) impacts region (b) then (c) and then back to the origin region (a). The second one does not have this feedback attribute.
+
+# Results
+
+Section 4 report the exploratory data analysis spatial of state and county data in particular Moran’s I. This section is divided in two parts: in the first one, we present the results of a relatively longer time series but at coarse geographic scale using state-level data, comparing the results previously reported by @griffin2015spatially. In the second one, shorter timer series with greater geographic detail  at the county-level data was provided.
+
+Global spatial autocorrelation was evaluated for a given geographic location to determine how related values and rents are to one another across the USA. As a reminder, the Moran’s I test statistic can take values from almost negative 1 to positive 1. Test statistics near 0 indicate spatially random or no spatial autocorrelation; from 0 to negative 1 indicates values are different or have negative autocorrelation; such that high values are close to low values. Test statistics from 0 to positive 1 indicates that values are similar to each other or have a positive autocorrelation; such that high values are close together and low values are clustered together.  Farmland values and rental rate are expected to have a strong and statistically significant spatial autocorrelation, i.e., Moran's I test statistics greater than 0.
+
+4.1	Exploratory spatial data analysis of U.S. states
+
+Affirming previous research, spatial correlation among states from 1950 to 2021 was detected. Taking spatial correlation into consideration is imperative for future analysis, especially to avoid traditional aspatial analyses that would be inappropriate in presence of these spatial effects. The spatial correlation at the 1st, 2nd, and 3rd order contiguity were statistically significant for all years. However, as the distance or contiguity increases the statistical power decreases, indicating that the effect with direct and immediate neighbors exists but with lower power (Figure 5). Spatial spillover effect of farmland values and rental rates is a secondary focus of this study. Results indicated that farmland values do not only have a significant positive direct effect on farmland values but also have a significant spatial spillover effect on neighboring states. 
+
+Figure 5 shows that farmland values are spatially correlated. Similar to farmland values, percent changes in farmland values were strongly correlated between states. Oscillations of the percentage change in farmland values indicates some changes may have contemporaneously occurred during some years but asynchronously in others (Figure 5). This could be the result of localized shocks in farmland values, indicating that since values are spatially correlated, a ripple effect started from the origin and moving to the sides. An important characteristic of the spillovers modeled in this study is that they are global in nature. According to Moran’s I test statistics (Figure 5), spillover effects at the state level are global, confirming our predictions and aligning with previous literature.
+
+Results are similar to those obtained by @griffin2015spatially. They found that changes in farmland values in one location could impact values in adjacent states. For example, a sale in Kansas can impact farmland prices in Nebraska ($1^{st}$ order contiguity), South Dakota ($2^{nd}$ order contiguity), and North Dakota ($3^{rd}$ order contiguity) although weaker than with $1^{st}$ order neighbors. Similar to @griffin2015spatially, we have shown that the spatial correlation of farmland values goes further than immediate neighbors although the effect of these linkages decreases as distance, proximity, or contiguity increases. Furthermore, results indicate that the spatial correlation in farmland value is sticky but unpredictable for farmland value changes.
+
+Shocks or price bubbles to farmland markets, especially the notable one beginning in the late 1970s through the mid-1980s can be detected by examining the Moran’s I test statistic of percentage change in farmland values. The spike in Moran’s I test statistic indicates a relatively stronger positive spatial autocorrelation in those years as percentage change across states moved together. 
+
+4.2	Exploratory spatial data analysis of U.S. Corn-belt counties
+
+To our knowledge and an exhaustive review of the literature very little research has been published with respect to time series of exploratory spatial data analysis of county-level data. Moran’s I test statistics for rental rates and percentage change in rental rates were estimated for non-irrigated cropland. Spatial correlation at the $1^{st}$, $2^{nd}$, and $3^{rd}$ order contiguity for all six years are presented in Figure 6. Similar to state-level analyses, Moran’s I test statistics were positive and statistically significant each year for all three queen contiguity orders. However, spatial autocorrelation is stronger at the county-level and with less variation than at the state-level although effects may be masked by relatively shorter time series.
+
+Rental rates and percentage change in rental rates are spatially correlated (Figure 6). As opposed to percent changes in state-level farmland values, percent changes in county-level rental rates were positively correlated between counties but with relatively lower Moran’s I test statistics. The movement of the percentage change in rental rates (Figure 6) indicates that changes may have occurred together. The pattern is more clearly denoted at the county-level than at the state-level even with the relatively shorter time series. This could be the result of location. Since distance between county centroids is less than that of states, an impact on county (a) affects county (b) and (c). In other words, the ripple effect of a shock to a dominant county radiates away in all directions easily since rental rates are strongly spatially autocorrelated.
+
+Results of this paper are consistent with the literature plus new findings are reported. Farmland values and percent change produced global spillovers. We assumed that just like state-level, county-level will have global spillovers as detected by the global indicator of spatial association. According to our estimates of Moran’s I test statistics (Figure 6), spillover effects at county-levels remain global but are able to model more localized phenomena. Therefore, farmland owners, farmers, real estate professionals, and land developers can be susceptible to price volatility in the short run. However, knowing that prices are correlated with global spillovers, opportunity is given to adopt a conservatively position when facing risks. A good understanding of the determinants of farmland ownership and rental rates is necessary. Two interesting scenarios that can help all the participants of the farmland market. Giving a broad and fruitful direction for future research. 
+
+
+```{r warning=FALSE, echo=FALSE, fig.align = 'center', out.width = "125%", fig.cap = "Moran's I test statistic estimates for farmland values and percentage change for lower 48 US states, 1960-2020 ."}
+
+ggplot(data = moranstate, 
+       aes(x = year, y=I, group = contiguity, col = contiguity, linetype = contiguity)) +
+  geom_line(lwd = 0.9) + #
+  geom_hline(yintercept = 0, linetype='dashed') +
+  labs(title = "Moran's I Test Statistics: 1960 - 2020",
+       subtitle = paste('Farmland values and percentage change appreciation rates'),
+       caption = 'Data: USDA National Agriculutural Statistics Service',
+       y="Moran's I test statistic", x = NULL) + ylim(-0.1, 1.0) +
+  theme_bw() +
+  #    axis.text.x=element_blank(),
+  #   axis.ticks.x=element_blank())+
+  theme(text = element_text(family='serif'),
+        plot.title = element_text(face='bold'),
+        plot.subtitle=element_text(size=8),
+        plot.caption=element_text(size=8),
+        axis.title.x = element_blank(),
+        legend.title = element_blank(),
+        legend.position = "bottom")  +
+  scale_color_aaas(
+    #breaks = c("First",   "FirstC"  , "Second"  , "SecondC",  "Third",   "ThirdC" ),
+    labels=c("farmland values ($/ac), first order", "farmland values (% change), first order",
+             "farmland value ($/ac), second order", "farmland values (% change), second order",
+             "farmland value ($/ac), third order", "farmland values (% change), third order")) + 
+  scale_linetype_manual(
+    values = c("solid", "dotted", "solid", "dotted", "solid", "dotted"),
+    #    breaks = NULL, 
+    labels = c("farmland values ($/ac), first order", "farmland values (% change), first order",
+               "farmland value ($/ac), second order", "farmland values (% change), second order",
+               "farmland value ($/ac), third order", "farmland values (% change), third order"))  +
+  scale_x_continuous(breaks = seq(1960, 2022, 10), limits = c(1960, 2022)) 
+
+```
+
+```{r warning=FALSE, echo=FALSE, fig.align = 'center', out.width = "125%", fig.cap = "Moran's I test statistic estimates for non-irrigated county-level rental rates and percentage change, 2009-2014."}
+ggplot(data = moranDat, 
+       aes(x=year, y=I, group = contiguity, col = contiguity, linetype = contiguity)) +
+  geom_line(lwd = 0.9) + #
+  geom_hline(yintercept = 0, linetype='dashed') +
+  labs(title = "Moran's I Test Statistics: 2009 - 2014",
+       subtitle = paste('Farmland values and percentage change appreciation rates'),
+       caption = 'Data: USDA National Agriculutural Statistics Service',
+       y="Moran's I test statistic", x = NULL) + ylim(-0.1, 1.0) +
+      theme_bw() +
+  theme(text = element_text(family='serif'),
+        plot.title = element_text(face='bold'),
+        plot.subtitle=element_text(size=8),
+        plot.caption=element_text(size=8),
+        axis.title.x = element_blank(),
+        legend.title = element_blank(),
+        legend.position = "bottom")  +
+  scale_color_aaas(
+    #breaks = c("First",   "FirstC"  , "Second"  , "SecondC",  "Third",   "ThirdC" ),
+    labels=c("farmland values ($/ac), first order", "farmland values (% change), first order",
+             "farmland value ($/ac), second order", "farmland values (% change), second order",
+             "farmland value ($/ac), third order", "farmland values (% change), third order")) + 
+   scale_linetype_manual(
+     values = c("solid", "dotted", "solid", "dotted", "solid", "dotted"),
+#    breaks = NULL, 
+     labels = c("farmland values ($/ac), first order", "farmland values (% change), first order",
+            "farmland value ($/ac), second order", "farmland values (% change), second order",
+            "farmland value ($/ac), third order", "farmland values (% change), third order")) 
+
+
+
+```
+
+\newpage
+
+# Conclusions
+Our findings have many important contributions to both the economic literature surrounding farmland markets as well as farmers looking to purchase or rent land. The first and main insight is the existence of spatial correlation at the state and county-levels, and that the spillover effects are global. This suggests that farmers can successfully adopt a conservative position when facing risks, knowing how prices are going to change after a shock in the near state or county.
+
+Another primary insight lies in the findings that confirm previous literature. Just like @griffin2015spatially, we found that farmland values at the state-level are spatially correlated. However, using rental rates at county-level data, we found a similar effect. This may be a unique characteristic of the specific corn-belt area. This highlights the importance of unique regional characteristics in modeling.
+
+There has been little research on spatial correlation using rental rates at the county-level, even though it is an important investment for agricultural operations. Primarily research has focused on farmland values at state-level, recently @wang2018spatial provided the first look into the spatial correlation of farmland at county-level. However, in this research, we built upon @griffin2015spatially by highlighting the importance of farmland values, rental rates, and their percent change at the state and county-levels, respectively. This provides essential information for farmers regarding the development of farmland, as well as real investors and other participants of the farmland markets investing on land in their operation.
+
+\newpage
+
+
+# References
